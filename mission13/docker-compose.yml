@@ -1,0 +1,41 @@
+    services:
+      # Conteneur MARIADB
+      mariadb:
+        image: mariadb:latest
+        hostname: mariadb
+        networks:
+          - backend
+        volumes:
+          - mysql_data:/var/lib/mysql  # Volume persistant pour la base de données
+        env_file:
+          - ./mariadb.env
+        restart: always
+        ports:
+          - "3306:3306"  # Expose le port 3306 pour la base de données
+
+      # Conteneur GLPI 10
+      glpi:
+        image: diouxx/glpi
+        container_name: glpi
+        hostname: glpi
+        networks:
+          - traefik-proxy
+          - backend
+        volumes:
+          - /etc/timezone:/etc/timezone:ro
+          - /etc/localtime:/etc/localtime:ro
+          - glpi_data:/var/www/html/glpi  # Volume persistant pour les fichiers et plugins de GLPI
+        environment:
+          - TIMEZONE=Europe/Paris
+        restart: always
+        ports:
+          - "80:80"  # Expose le port 80 pour accéder à GLPI via HTTP
+
+    networks:
+      traefik-proxy:
+        driver: bridge  # Utilisation d'un réseau interne
+      backend:
+
+    volumes:
+      mysql_data: {}  # Volume persistant pour MariaDB
+      glpi_data: {}   # Volume persistant pour GLPI
